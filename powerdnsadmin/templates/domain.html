@@ -1,6 +1,9 @@
 {% extends "base.html" %}
 {% block title %}<title>{{ domain.name | pretty_domain_name }} - {{ SITE_NAME }}</title>{% endblock %}
-
+{% block extra_head %}
+      <link rel="stylesheet" href="/static/custom/css/select2.css">
+        <script src="/static/custom/js/select2.js"> </script>
+{% endblock %}
 {% block dashboard_stat %}
 <section class="content-header">
     <h1>
@@ -50,6 +53,7 @@
                                 <th>TTL</th>
                                 <th>Data</th>
                                 <th>Comment</th>
+                                <th>Masking</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
                                 {% if current_user.role.name in ['Administrator', 'Operator'] or SETTING.get('allow_user_view_history') %}
@@ -75,8 +79,18 @@
                                     <td>
                                         {{ record.data | pretty_domain_name }}
                                     </td>
+
                                     <td>
                                         {{ record.comment }}
+                                    </td>
+                                    <td>
+
+                                        <select class="js-example-basic-multiple" name="states[]" multiple="multiple">
+                                          <option value="1">192.168.1.34</option>
+                                          <option value="2">192.168.1.35</option>
+                                          <option value="3">192.168.1.36</option>
+                                          <option value="4">192.168.1.343</option>
+                                        </select>
                                     </td>
                                 {% if domain.type != 'Slave' %}
                                     <td width="6%">
@@ -125,6 +139,9 @@
 {% endblock %}
 {% block extrascripts %}
 <script>
+    $(document).ready(function() {
+    $('.js-example-basic-multiple').select2();
+});
     // superglobals
     window.records_allow_edit = {{ editable_records | tojson }};
     window.ttl_options = {{ ttl_options | tojson }};

@@ -76,7 +76,7 @@
     <div class="row">
         <div class="col-xs-12">
             <div class="box">
-                <form method="post" action="{{ url_for('domain.setting', domain_name=domain.name) }}">
+                <form method="post" action="{{ url_for('domain.add_masking_address', domain_name=domain.name) }}">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
                     <div class="box-header">
                         <h3 class="box-title">Domain Masking Control</h3>
@@ -88,13 +88,7 @@
                                     In the {{ domain.name | pretty_domain_name }} domain.</p>
                             </div>
                             <div class="form-group col-xs-2">
-                                <select multiple="multiple" class="form-control" id="domain_multi_user"
-                                    name="domain_multi_user[]">
-                                    {% for user in users %}
-                                    <option {% if user.id in
-                                    domain_user_ids %}selected{% endif %} value="{{ user.username }}"
-                                        {% if user.role.name== 'Administrator' %}style="color: red" {% endif %}>{{
-                                    user.username}}</option> {% endfor %}
+                                <select class="form-control masking-ip-addresses" multiple="multiple" name="ip_address">
                                 </select>
                             </div>
                         </div>
@@ -283,6 +277,13 @@
 {% endblock %}
 {% block extrascripts %}
 <script>
+    $(document).ready(function() {
+        $(".masking-ip-addresses").select2({
+            tags: true,
+            tokenSeparators: [',', ' ']
+         })
+    });
+
     //initialize pretty checkboxes
     $('.dyndns_on_demand_toggle').iCheck({
         checkboxClass: 'icheckbox_square-blue',

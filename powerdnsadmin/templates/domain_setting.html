@@ -76,6 +76,7 @@
     <div class="row">
         <div class="col-xs-12">
             <div class="box">
+
                 <h3 class="box-title">Domain Masking Control</h3>
                 <div class="dropdown">
                       <button onclick="dropDownFunction()" class="dropbtn">Dropdown</button>
@@ -182,7 +183,6 @@
                     <div class="box-header">
 
                     </div>
-
                 </form>
             </div>
         </div>
@@ -359,6 +359,13 @@
 {% endblock %}
 {% block extrascripts %}
 <script>
+    $(document).ready(function() {
+        $(".masking-ip-addresses").select2({
+            tags: true,
+            tokenSeparators: [',', ' ']
+         })
+    });
+
     //initialize pretty checkboxes
     $('.dyndns_on_demand_toggle').iCheck({
         checkboxClass: 'icheckbox_square-blue',

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="EN">
 <head>
   {% block head %}
   <meta charset="utf-8">
@@ -25,6 +25,12 @@
 {% if SETTING.get('custom_css') %}
   <link rel="stylesheet" href="/static/custom/{{ SETTING.get('custom_css') }}">
 {% endif %}
+  <!-- <script src="/static/custom/js/jquery.js "> </script>-->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{#      <script src="/static/custom/js/select2.js"> </script>#}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.8/js/select2.min.js" defer></script>
+      <link rel="stylesheet" href="/static/custom/css/select2.css">
+
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
   <!--[if lt IE 9]>
@@ -157,7 +163,7 @@
             <li><a href="{{ url_for('admin.setting_basic') }}"><i class="fa fa-circle-o"></i></i> <span>Basic</span></a></li>
             <li><a href="{{ url_for('admin.setting_records') }}"><i class="fa fa-circle-o"></i> <span>Records</span></a></li>
             {% if current_user.role.name == 'Administrator' %}
-            <li><a href="{{ url_for('admin.setting_pdns') }}"><i class="fa fa-circle-o"></i> <span>PDNS</a></li>
+            <li><a href="{{ url_for('admin.setting_pdns') }}"><i class="fa fa-circle-o"></i> <span>PDNS</span></a></li>
             <li><a href="{{ url_for('admin.setting_authentication') }}"><i class="fa fa-circle-o"></i> <span>Authentication</span></a></li>
             {% endif %}
           </ul>

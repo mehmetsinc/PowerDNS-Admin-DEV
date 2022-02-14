@@ -879,3 +879,21 @@ class Domain(db.Model):
                 DomainUser.user_id == user_id,
                 AccountUser.user_id == user_id
             )).filter(Domain.id == self.id).first()
+
+class MaskingRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    domain_id = db.Column(db.Integer, db.ForeignKey('domain.id'))
+    ip_address = db.Column(db.String(50), index=True)
+    default = db.Column(db.Boolean, default=False)
+
+    # def __init__(self, domain_id, ip_address, id=None, default=False):
+    #     self.domain_id = domain_id
+    #     self.ip_address = ip_address
+    #     self.default = default
+    #     self.PDNS_STATS_URL = Setting().get('pdns_api_url')
+    #     self.PDNS_API_KEY = Setting().get('pdns_api_key')
+    #     self.PDNS_VERSION = Setting().get('pdns_version')
+    #     self.API_EXTENDED_URL = utils.pdns_api_extended_uri(self.PDNS_VERSION)
+
+    # def __repr__(self):
+    #     return '<Masking {0}>'.format(self.ip_address)

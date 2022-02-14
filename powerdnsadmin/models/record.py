@@ -30,12 +30,14 @@ class Record(object):
                  status=None,
                  ttl=None,
                  data=None,
+                 masking=None,
                  comment_data=None):
         self.name = name
         self.type = type
         self.status = status
         self.ttl = ttl
         self.data = data
+        self.masking = masking
         self.comment_data = comment_data
         # PDNS configs
         self.PDNS_STATS_URL = Setting().get('pdns_api_url')

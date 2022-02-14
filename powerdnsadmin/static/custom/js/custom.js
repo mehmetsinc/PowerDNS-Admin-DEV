@@ -83,6 +83,25 @@ function getTableData(table) {
     return records
 }
 
+function getMaskedTableData(table) {
+    // reformat - pretty format
+    var maskedrecords = []
+    table.rows().every(function() {
+        var r = this.data();
+        var record = {}
+        record["record_name"] = r[0].trim();
+        record["record_type"] = r[1].trim();
+        record["record_status"] = r[2].trim();
+        record["record_ttl"] = r[3].trim();
+        record["record_data"] = r[4].trim();
+        record["record_maskedip01"] = r[5].trim();
+        record["record_maskedip02"] = r[6].trim();
+        record["record_comment"] = r[7].trim();
+        maskedrecords.push(maskedrecord);
+    });
+    return maskedrecords
+}
+
 function saveRow(oTable, nRow) {
 
     var status = 'Disabled';

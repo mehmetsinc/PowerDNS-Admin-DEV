@@ -55,6 +55,75 @@
                                     {% for user in users %}
                                     <option {% if user.id in
                                     domain_user_ids %}selected{% endif %} value="{{ user.username }}"
+                                        {% if user.role.name== 'Administrator' %}style="color: red" {% endif %}>{{
+                                    user.username}}</option> {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            <div class="col-xs-offset-2">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-flat btn-primary"><i class="fa fa-check"></i>
+                                        Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <form method="post" action="{{ url_for('domain.setting', domain_name=domain.name) }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    <div class="box-header">
+                        <h3 class="box-title">Domain Access Control</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-xs-2">
+                                {% for record in records %}
+                                <p>{{ (record.name,domain.name) | display_record_name | pretty_domain_name }}</p>
+                                <p>Click on users to move from between columns.</p>
+                                <p>
+                                    Users in <font style="color: red;">red</font> are Administrators
+                                    and already have access to <b>ALL</b> domains.
+                                </p>
+                            </div>
+
+                        </div>
+                        <div class="box-body">
+                            <div class="col-xs-offset-2">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-flat btn-primary"><i class="fa fa-check"></i>
+                                        Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <form method="post" action="{{ url_for('domain.setting', domain_name=domain.name) }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    <div class="box-header">
+                        <h3 class="box-title">Domain Access Control</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+
+                            <div class="form-group col-xs-2">
+                                <select multiple="multiple" class="form-control" id="masking_record_selector"
+                                    name="domain_multi_user[]">
+                                    {% for user in users %}
+                                    <option {% if user.id in
+                                    domain_user_ids %}selected{% endif %} value="{{ user.username }}"
                                         {% if user.role.name=='Administrator' %}style="color: red" {% endif %}>{{
                                     user.username}}</option> {% endfor %}
                                 </select>
@@ -76,11 +145,15 @@
     <div class="row">
         <div class="col-xs-12">
             <div class="box">
-                <h3 class="box-title">Domain Masking Control</h3>
-                <div class="dropdown">
-                      <button onclick="dropDownFunction()" class="dropbtn">Dropdown</button>
+                <form method="post" action="{{ url_for('domain.setting', domain_name=domain.name) }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                    <div class="box-header">
+                        <h3 class="box-title">Domain Massking Control</h3>
+                    </div>
+                    <div class="dropdown">
+                      <button onclick="myFunction()" class="dropbtn">Dropdown</button>
                       <div id="myDropdown" class="dropdown-content">
-                        <input type="text" placeholder="Search.." id="dropDownId" onkeyup="dropDownFilterFunction()">
+                        <input type="text" placeholder="Search.." id="dropDownId" onkeyup="filterFunction()">
                         <a href="#about">About</a>
                         <a href="#base">Base</a>
                         <a href="#blog">Blog</a>
@@ -90,99 +163,6 @@
                         <a href="#tools">Tools</a>
                       </div>
                     </div>
-                <label class="switch">
-                  <input type="checkbox">
-                  <span class="slider round"></span>
-                </label>
-                <div class="box-body">
-                    <table id="tbl_maskedrecords" class="table table-bordered table-striped">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Status</th>
-                                <th>TTL</th>
-                                <th>Data</th>
-                                <th>MaskedIP-01</th>
-                                <th>MaskedIP-02</th>
-                                <th>Comment</th>
-                                <th>Edit</th>
-                                <th>Delete</th>
-                                {% if current_user.role.name in ['Administrator', 'Operator'] or SETTING.get('allow_user_view_history') %}
-                                <th >Changelog</th>
-                                {% endif %}
-                            </tr>
-                        </thead>
-                        <tbody>
-                                {% for maskedrecord in maskedrecords %}
-                                <tr class="odd row_record" id="{{ domain.name }}">
-                                    <td>
-                                        {{ (record.name,domain.name) | display_record_name | pretty_domain_name }}
-                                    </td>
-                                    <td>
-                                        {{ record.type }}
-                                    </td>
-                                    <td>
-                                        {{ record.status }}
-                                    </td>
-                                    <td>
-                                        {{ record.ttl }}
-                                    </td>
-                                    <td>
-                                        {{ record.data | pretty_domain_name }}
-                                    </td>
-                                    <td>
-                                        {{ record.masskedip01 | pretty_domain_name }}
-                                    </td>
-                                    <td>
-                                        {{ record.masskedip01 | pretty_domain_name }}
-                                    </td>
-                                    <td>
-                                        {{ record.comment }}
-                                    </td>
-                                {% if domain.type != 'Slave' %}
-                                    <td width="6%">
-                                        {% if record.is_allowed_edit() %}
-                                            <button type="button" class="btn btn-flat btn-warning button_edit">Edit&nbsp;<i class="fa fa-edit"></i></button>
-                                        {% else %}
-                                            <button type="button" class="btn btn-flat btn-warning">&nbsp;&nbsp;<i class="fa fa-exclamation-circle"></i></button>
-                                        {% endif %}
-                                    </td>
-                                    <td width="6%">
-                                        {% if record.is_allowed_delete() %}
-                                            <button type="button" class="btn btn-flat btn-danger button_delete">Delete&nbsp;<i class="fa fa-trash"></i></button>
-                                        {% endif %}
-                                    </td>
-                                {% else %}
-                                    <td width="6%">
-                                        <button type="button" class="btn btn-flat btn-warning">&nbsp;&nbsp;<i class="fa fa-exclamation-circle"></i>&nbsp;&nbsp;</button>
-                                    </td>
-                                    <td width="6%">
-                                        <button type="button" class="btn btn-flat btn-warning">&nbsp;&nbsp;<i class="fa fa-exclamation-circle"></i>&nbsp;&nbsp;</button>
-                                    </td>
-                                {% endif %}
-                                    </td>
-                                    {% if current_user.role.name in ['Administrator', 'Operator'] or SETTING.get('allow_user_view_history') %}
-                                    <td width="6%">
-                                        <button type="button" onclick="show_record_changelog('{{record.name}}','{{record.type}}',event)" class="btn btn-flat btn-primary">&nbsp;&nbsp;
-                                                            <i class="fa fa-history" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;
-                                        </button>
-                                    </td>
-                                    {% endif %}
-                                    <!-- hidden column that we can sort on -->
-                                    <td>1</td>
-                                </tr>
-                                {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-
-                <form method="post" action="{{ url_for('domain.setting', domain_name=domain.name) }}">
-                    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
-                    <div class="box-header">
-
-                    </div>
-
                 </form>
             </div>
         </div>
@@ -404,6 +384,41 @@
             this.qs2.cache();
         }
     });
+    $("#masking_record_selector").multiSelect({
+        selectableHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='Username'>",
+        selectionHeader: "<input type='text' class='search-input' autocomplete='off' placeholder='Username'>",
+        afterInit: function (ms) {
+            var that = this,
+                $selectableSearch = that.$selectableUl.prev(),
+                $selectionSearch = that.$selectionUl.prev(),
+                selectableSearchString = '#' + that.$container.attr('id') + ' .ms-elem-selectable:not(.ms-selected)',
+                selectionSearchString = '#' + that.$container.attr('id') + ' .ms-elem-selection.ms-selected';
+
+            that.qs1 = $selectableSearch.quicksearch(selectableSearchString)
+                .on('keydown', function (e) {
+                    if (e.which === 40) {
+                        that.$selectableUl.focus();
+                        return false;
+                    }
+                });
+
+            that.qs2 = $selectionSearch.quicksearch(selectionSearchString)
+                .on('keydown', function (e) {
+                    if (e.which == 40) {
+                        that.$selectionUl.focus();
+                        return false;
+                    }
+                });
+        },
+        afterSelect: function () {
+            this.qs1.cache();
+            this.qs2.cache();
+        },
+        afterDeselect: function () {
+            this.qs1.cache();
+            this.qs2.cache();
+        }
+    });
 
     //handle checkbox toggling
     $('.dyndns_on_demand_toggle').on('ifToggled', function (event) {
@@ -463,11 +478,11 @@
     //
         /* When the user clicks on the button,
     toggle between hiding and showing the dropdown content */
-    function dropDownFunction() {
+    function myFunction() {
       document.getElementById("myDropdown").classList.toggle("show");
     }
 
-    function dropDownFilterFunction() {
+    function filterFunction() {
       var input, filter, ul, li, a, i;
       input = document.getElementById("dropDownId");
       filter = input.value.toUpperCase();
@@ -482,200 +497,7 @@
         }
       }
     }
-    function show_record_changelog(record_name, record_type, e) {
-        e.stopPropagation();
-        window.location.href = "/domain/{{domain.name}}/changelog/" + record_name + ".-" + record_type;
-    }
-    // handle changelog button
-    $(document.body).on("click", ".button_changelog", function(e) {
-        e.stopPropagation();
-        window.location.href = "/domain/{{domain.name}}/changelog";
-    });
-    //###################### ADDED DOMAIN.HTML FUNCTİON SCRİPTS #########################//
-    $("#tbl_maskedrecords").DataTable({
-        "paging" : true,
-        "lengthChange" : true,
-        "searching" : true,
-        "ordering" : true,
-        "info" : true,
-        "autoWidth" : false,
-        {% if SETTING.get('default_record_table_size') | string in ['5','15','20'] %}
-        "lengthMenu": [ [5, 15, 20, -1],
-                        [5, 15, 20, "All"]],
-        {% else %}
-        "lengthMenu": [ [5, 15, 20, {{ SETTING.get('default_record_table_size') }}, -1],
-                        [5, 15, 20, {{ SETTING.get('default_record_table_size') }}, "All"]],
-        {% endif %}
-        "pageLength": {{ SETTING.get('default_record_table_size') }},
-        "language": {
-            "lengthMenu": " _MENU_ records"
-        },
-        "retrieve" : true,
-        "columnDefs": [
-            {
-                type: 'natural',
-                targets: [0, 4]
-            },
-            {
-                // hidden column so that we can add new records on top
-                // regardless of whatever sorting is done. See orderFixed
-                visible: false,
-                {% if current_user.role.name in ['Administrator', 'Operator'] or SETTING.get('allow_user_view_history') %}
-                targets: [ 9 ]
-                {% else %}
-                targets: [ 8 ]
-                {% endif %}
-            },
-            {
-                className: "length-break",
-                targets: [ 4, 5 ]
-            }
-        ],
-        {% if current_user.role.name in ['Administrator', 'Operator'] or SETTING.get('allow_user_view_history') %}
-        "orderFixed": [[9, 'asc']]
-        {% else %}
-        "orderFixed": [[8, 'asc']]
-        {% endif %}
-    });
 
-    function show_record_changelog(record_name, record_type, e) {
-        e.stopPropagation();
-        window.location.href = "/domain/{{domain.name}}/changelog/" + record_name + ".-" + record_type;
-    }
-    // handle changelog button
-    $(document.body).on("click", ".button_changelog", function(e) {
-        e.stopPropagation();
-        window.location.href = "/domain/{{domain.name}}/changelog";
-    });
-
-    // handle delete button
-    $(document.body).on("click", ".button_delete", function(e) {
-        e.stopPropagation();
-        var modal = $("#modal_delete");
-        var table = $("#tbl_maskedrecords").DataTable();
-        var record = $(this).prop('id');
-        var nRow = $(this).parents('tr')[0];
-        var info = "Are you sure you want to delete " + record + "?";
-        modal.find('.modal-body p').text(info);
-        modal.modal('show');
-
-        $("#button_delete_confirm").unbind().one('click', function(e) {
-            table.row(nRow).remove().draw();
-            modal.modal('hide');
-        });
-
-        $("#button_delete_cancel").unbind().one('click', function(e) {
-            modal.modal('hide');
-        });
-    });
-    // handle edit button and record click
-    $(document.body).on("click", ".button_edit{% if quick_edit %}, .row_record{% endif %}", function(e) {
-         e.stopPropagation();
-         if ($(this).is('tr')) {
-            var nRow = $(this)[0];
-         } else {
-            var nRow = $(this).parents('tr')[0];
-         }
-         var table = $("#tbl_maskedrecords").DataTable();
-
-        if (nEditing == nRow) {
-            /* click on row already being edited, do nothing */
-        } else if (nEditing !== null && nEditing != nRow && nNew == false) {
-             /* Currently editing - but not this row - restore the old before continuing to edit mode */
-             restoreRow(table, nEditing);
-             editRow(table, nRow);
-             nEditing = nRow;
-         } else if (nNew == true) {
-             /* adding a new row, delete it and start editing */
-             table.row(nEditing).remove().draw();
-             nNew = false;
-             editRow(table, nRow);
-             nEditing = nRow;
-         } else {
-             /* No edit in progress - let's start one */
-             editRow(table, nRow);
-             nEditing = nRow;
-         }
-    });
-    //// test
-    // handle apply changes button
-    $(document.body).on("click",".button_apply_changes", function() {
-        if (nNew || nEditing) {
-            var modal = $("#modal_error");
-            modal.find('.modal-body p').text("Previous record not saved. Please save it before applying the changes.");
-            modal.modal('show');
-            return;
-        }
-
-        var modal = $("#modal_apply_changes");
-        var table = $("#tbl_maskedrecords").DataTable();
-        var domain = $(this).prop('id');
-        var serial = $(".button_apply_changes").val();
-        var info = "Are you sure you want to apply your changes?";
-        modal.find('.modal-body p').text(info);
-
-        // following unbind("click") is to avoid multiple times execution
-        modal.find('#button_apply_confirm').unbind("click").click(function() {
-            var data = {'serial': serial, 'record': getMaskedTableData(table), '_csrf_token': '{{ csrf_token() }}'};
-            applyRecordChanges(data, domain);
-            modal.modal('hide');
-        })
-        modal.modal('show');
-
-    });
-
-    // handle add record button
-    $(document.body).on("click", ".button_add_record", function (e) {
-            if (nNew || nEditing) {
-                var modal = $("#modal_error");
-                modal.find('.modal-body p').text("Previous record not saved. Please save it before adding more record.");
-                modal.modal('show');
-                return;
-            }
-            // clear search first
-            $("#tbl_maskedrecords").DataTable().search('').columns().search('').draw();
-
-            // add new row
-            var default_type = records_allow_edit[0]
-            {% if current_user.role.name in ['Administrator', 'Operator'] or SETTING.get('allow_user_view_history') %}
-	        var nRow = jQuery('#tbl_maskedrecords').dataTable().fnAddData(['', default_type, 'Active', window.ttl_options[0][0], '', '', '', '', '', '0']);
-            {% else %}
-            var nRow = jQuery('#tbl_maskedrecords').dataTable().fnAddData(['', default_type, 'Active', window.ttl_options[0][0], '', '', '', '', '0']);
-            {% endif %}
-            editRow($("#tbl_maskedrecords").DataTable(), nRow);
-            document.getElementById("edit-row-focus").focus();
-            nEditing = nRow;
-            nNew = true;
-        });
-
-    //handle cancel button
-    $(document.body).on("click", ".button_cancel", function (e) {
-            e.stopPropagation();
-            var oTable = $("#tbl_maskedrecords").DataTable();
-            if (nNew) {
-                oTable.row(nEditing).remove().draw();
-                nEditing = null;
-                nNew = false;
-            } else {
-                restoreRow(oTable, nEditing);
-                nEditing = null;
-            }
-        });
-
-    //handle save button
-    $(document.body).on("click", ".button_save", function (e) {
-            e.stopPropagation();
-            var table = $("#tbl_maskedrecords").DataTable();
-            saveRow(table, nEditing);
-            nEditing = null;
-            nNew = false;
-        });
-
-    //handle update_from_master button
-    $(document.body).on("click", ".button_update_from_master", function (e) {
-            var domain = $(this).prop('id');
-            applyChanges({'domain': domain, '_csrf_token': '{{ csrf_token() }}'}, $SCRIPT_ROOT + '/domain/' + domain + '/update', true);
-    });
 </script>
 {% endblock %}
 {% block modals %}

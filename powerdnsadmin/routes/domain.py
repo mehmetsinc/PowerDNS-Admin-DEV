@@ -935,3 +935,32 @@ def admin_setdomainsetting(domain_name):
                     'msg':
                     'There is something wrong, please contact Administrator.'
                 }), 400)
+
+
+@domain_bp.route('/setting/<path:domain_name>/manage/add-masking-address', methods=['POST'])
+@login_required
+@operator_role_required
+def add_masking_address(domain_name):
+    if request.method == 'POST':
+        try:
+            jdata = request.form
+            print("jdata",jdata)
+            data = jdata['data']
+            print("data ",data)
+            print('burdaımmmm')
+            return make_response(
+                jsonify({
+                    'status': 'ok',
+                    'msg': jdata
+                }))
+        except Exception as e:
+            current_app.logger.error(
+                'Cannot change domain setting. Error: {0}'.format(e))
+            current_app.logger.debug(traceback.format_exc())
+            return make_response(
+                jsonify({
+                    'status':
+                    'error',
+                    'msg':
+                    'There is something wrong, please contact Administrator.'
+                }), 400)

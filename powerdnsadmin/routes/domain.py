@@ -108,12 +108,14 @@ def domain(domain_name):
                         c=r['comments'][index]['content']
                     else:
                         c=''
+                    get_extra_data = Record().get_db_row(domain.id, r_name)
                     record_entry = RecordEntry(
                         name=r_name,
                         type=r['type'],
                         status='Disabled' if record['disabled'] else 'Active',
                         ttl=r['ttl'],
                         data=record['content'],
+                        maskedswitchstatus=get_extra_data['maskedswitchstatus'],
                         comment=c,
                         is_allowed_edit=True)
                     index += 1
@@ -510,7 +512,7 @@ def delete(domain_name):
 @domain_bp.route('/setting/<path:domain_name>/manage', methods=['GET', 'POST'])
 @login_required
 @operator_role_required
-def setting(domain_name):
+def setting(domain_name, maskedip02=None, maskedip01=None):
     if request.method == 'GET':
         domain = Domain.query.filter(Domain.name == domain_name).first()
         if not domain:
@@ -523,11 +525,68 @@ def setting(domain_name):
         domain_user_ids = d.get_user()
         account = d.get_account()
 
+        # Query domain's rrsets from PowerDNS API
+        rrsets = Record().get_rrsets(domain.name)
+        current_app.logger.debug("Fetched rrests: \n{}".format(pretty_json(rrsets)))
+
+        # API server might be down, misconfigured
+        if not rrsets and domain.type != 'Slave':
+            abort(500)
+
+
+        records_allow_to_edit = Setting().get_records_allow_to_edit()
+        records = []
+        forward_records_allow_to_edit = Setting(
+        ).get_forward_records_allow_to_edit()
+        reverse_records_allow_to_edit = Setting(
+        ).get_reverse_records_allow_to_edit()
+        ttl_options = Setting().get_ttl_options()
+        for r in rrsets:
+            if r['type'] in records_allow_to_edit:
+                r_name = r['name'].rstrip('.')
+
+                # If it is reverse zone and pretty_ipv6_ptr setting
+                # is enabled, we reformat the name for ipv6 records.
+                if Setting().get('pretty_ipv6_ptr') and r[
+                        'type'] == 'PTR' and 'ip6.arpa' in r_name and '*' not in r_name:
+                    r_name = dns.reversename.to_address(
+                        dns.name.from_text(r_name))
+
+                # Create the list of records in format that
+                # PDA jinja2 template can understand.
+                index = 0
+                for record in r['records']:
+                    if (len(r['comments'])>index):
+                        c=r['comments'][index]['content']
+                    else:
+                        c=''
+                    get_extra_data = Record().get_db_row(domain.id, r_name)
+                    record_entry = RecordEntry(
+                        name=r_name,
+                        type=r['type'],
+                        status='Disabled' if record['disabled'] else 'Active',
+                        ttl=r['ttl'],
+                        data=record['content'],
+                        maskedip01=get_extra_data['maskedip01'],
+                        maskedip02=get_extra_data['maskedip02'],
+                        maskedswitchstatus=get_extra_data['maskedswitchstatus'],
+                        comment=c,
+                        is_allowed_edit=True)
+                    index += 1
+                    records.append(record_entry)
+        if not re.search(r'ip6\.arpa|in-addr\.arpa$', domain_name):
+            editable_records = forward_records_allow_to_edit
+        else:
+            editable_records = reverse_records_allow_to_edit
+
         return render_template('domain_setting.html',
                                domain=domain,
+                               records=records,
                                users=users,
                                domain_user_ids=domain_user_ids,
+                               editable_records=editable_records,
                                accounts=accounts,
+                               ttl_options=ttl_options,
                                domain_account=account)
 
     if request.method == 'POST':

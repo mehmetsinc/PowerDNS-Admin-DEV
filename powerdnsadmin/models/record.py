@@ -30,12 +30,18 @@ class Record(object):
                  status=None,
                  ttl=None,
                  data=None,
-                 comment_data=None):
+                 comment_data=None,
+                 maskedip01=None,
+                 maskedip02=None,
+                 maskedswitchstatus=None):
         self.name = name
         self.type = type
         self.status = status
         self.ttl = ttl
         self.data = data
+        self.maskedip01 = maskedip01
+        self.maskedip02 = maskedip02
+        self.maskedswitchstatus = maskedswitchstatus
         self.comment_data = comment_data
         # PDNS configs
         self.PDNS_STATS_URL = Setting().get('pdns_api_url')
@@ -627,4 +633,26 @@ class Record(object):
                 'status': False,
                 'msg':
                 'Could not find domain name {0} in local db'.format(domain)
+            }
+
+    def get_db_row(self, domain_id, name):
+        from sqlalchemy import text
+
+        sql = text(f"""SELECT maskedip01, maskedip02, maskedswitchstatus FROM public.records where domain_id ={domain_id}  and name = '{name}'""")
+        result = db.engine.execute(sql)
+        result = [row for row in result]
+        result = result[0]
+        if result:
+            return {
+                'maskedip01': result[0],
+                'maskedip02': result[1],
+                'maskedswitchstatus': result[2],
+
+            }
+        else:
+            return {
+                'maskedip01': None,
+                'maskedip02': None,
+                'maskedswitchstatus': None,
+
             }

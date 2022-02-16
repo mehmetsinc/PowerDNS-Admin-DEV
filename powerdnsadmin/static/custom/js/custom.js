@@ -77,7 +77,9 @@ function getTableData(table) {
         record["record_status"] = r[2].trim();
         record["record_ttl"] = r[3].trim();
         record["record_data"] = r[4].trim();
-        record["record_comment"] = r[5].trim();
+        record["record_maskedip01"] = r[5].trim();
+        record["record_maskedip02"] = r[6].trim();
+        record["record_comment"] = r[7].trim();
         records.push(record);
     });
     return records
@@ -102,7 +104,7 @@ function getMaskedTableData(table) {
     return maskedrecords
 }
 
-function saveRow(oTable, nRow) {
+function saveRow(oTable, nRow, type) {
 
     var status = 'Disabled';
     var jqInputs = $(oTable.row(nRow).node()).find("input");
@@ -123,9 +125,15 @@ function saveRow(oTable, nRow) {
     var button_edit = "<button type=\"button\" class=\"btn btn-flat btn-warning button_edit\" id=\"" + record +  "\">Edit&nbsp;<i class=\"fa fa-edit\"></i></button>"
     var button_delete = "<button type=\"button\" class=\"btn btn-flat btn-danger button_delete\" id=\"" + record +  "\">Delete&nbsp;<i class=\"fa fa-trash\"></i></button>"
 
-    oTable.cell(nRow,6).data(button_edit);
-    oTable.cell(nRow,7).data(button_delete);
+    if (type == "domain_setting"){
+        oTable.cell(nRow,9).data(button_edit);
+        oTable.cell(nRow,10).data(button_delete);
+    }
 
+    else{
+        oTable.cell(nRow,8).data(button_edit);
+        oTable.cell(nRow,9).data(button_delete);
+    }
     oTable.draw();
 }
 
@@ -143,7 +151,7 @@ function sec2str(t){
     return (d>0?d+' days ':'')+(h>0?h+' hours ':'')+(m>0?m+' minutes ':'')+(s>0?s+' seconds':'');
 }
 
-function editRow(oTable, nRow) {
+function editRow(oTable, nRow, type) {
     var isDisabled = 'true';
     var aData = oTable.row(nRow).data();
     var jqTds = oTable.cells(nRow,'').nodes();
@@ -168,9 +176,21 @@ function editRow(oTable, nRow) {
     jqTds[2].innerHTML = '<select class="form-control" id="record_status" name="record_status" value="' + aData[2]  + '"><option value="false">Active</option><option value="true">Disabled</option></select>';
     jqTds[3].innerHTML = '<select class="form-control" id="record_ttl" name="record_ttl" value="' + aData[3]  + '">' + ttl_opts + '</select>';
     jqTds[4].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="current_edit_record_data" name="current_edit_record_data" class="form-control input-small advance-data" value="' + aData[4].replace(/\"/g,"&quot;") + '">';
-    jqTds[5].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="record_comment" name="record_comment" class="form-control input-small advance-data" value="' + aData[5].replace(/\"/g, "&quot;") + '">';
-    jqTds[6].innerHTML = '<button type="button" class="btn btn-flat btn-primary button_save">Save</button>';
-    jqTds[7].innerHTML = '<button type="button" class="btn btn-flat btn-primary button_cancel">Cancel</button>';
+    if(type == "domain_settings"){
+        jqTds[5].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="maskedip01" name="maskedip01" class="form-control input-small advance-data" value="' + aData[5] + '">';
+        jqTds[6].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="maskedip02" name="maskedip02" class="form-control input-small advance-data" value="' + aData[6] + '">';
+        jqTds[7].innerHTML = aData[7];
+        jqTds[8].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="record_comment" name="record_comment" class="form-control input-small advance-data" value="' + aData[8].replace(/\"/g, "&quot;") + '">';
+        jqTds[9].innerHTML = '<button type="button" class="btn btn-flat btn-primary button_save">Save</button>';
+        jqTds[10].innerHTML = '<button type="button" class="btn btn-flat btn-primary button_cancel">Cancel</button>';
+    }
+    else{
+        jqTds[5].innerHTML = aData[5];
+        jqTds[6].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="record_comment" name="record_comment" class="form-control input-small advance-data" value="' + aData[6].replace(/\"/g, "&quot;") + '">';
+        jqTds[7].innerHTML = '<button type="button" class="btn btn-flat btn-primary button_save">Save</button>';
+        jqTds[8].innerHTML = '<button type="button" class="btn btn-flat btn-primary button_cancel">Cancel</button>';
+    }
+
 
     // set current value of dropdown column
     if (aData[2] == 'Active'){

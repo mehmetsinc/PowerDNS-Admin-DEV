@@ -59,6 +59,7 @@ def create_app(config=None):
     csrf.exempt(routes.api.api_zone_cryptokey)
 
     # Load config from env variables if using docker
+    print(os.path.exists(os.path.join(app.root_path, 'docker_config.py')))
     if os.path.exists(os.path.join(app.root_path, 'docker_config.py')):
         app.config.from_object('powerdnsadmin.docker_config')
     else:

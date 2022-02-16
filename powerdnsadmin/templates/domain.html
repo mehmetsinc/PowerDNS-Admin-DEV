@@ -54,6 +54,7 @@
                                 <th>Status</th>
                                 <th>TTL</th>
                                 <th>Data</th>
+                                <th>Switch status</th>
                                 <th>Comment</th>
                                 <th>Masking</th>
                                 <th>Edit</th>
@@ -82,6 +83,12 @@
                                         {{ record.data | pretty_domain_name }}
                                     </td>
 
+                                    <td>
+                                        <label class="switch">
+                                          <input name="maskedswitchstatus" type="checkbox" {% if record.maskedswitchstatus %} checked {% endif  %} >
+                                          <span class="slider round"></span>
+                                        </label>
+                                    </td>
                                     <td>
                                         {{ record.comment }}
                                     </td>
@@ -180,9 +187,9 @@
                 // regardless of whatever sorting is done. See orderFixed
                 visible: false,
                 {% if current_user.role.name in ['Administrator', 'Operator'] or SETTING.get('allow_user_view_history') %}
-                targets: [ 9 ]
+                targets: [ 10 ]
                 {% else %}
-                targets: [ 8 ]
+                targets: [ 9 ]
                 {% endif %}
             },
             {
@@ -191,9 +198,9 @@
             }
         ],
         {% if current_user.role.name in ['Administrator', 'Operator'] or SETTING.get('allow_user_view_history') %}
-        "orderFixed": [[9, 'asc']]
+        "orderFixed": [[10, 'asc']]
         {% else %}
-        "orderFixed": [[8, 'asc']]
+        "orderFixed": [[9, 'asc']]
         {% endif %}
     });
 

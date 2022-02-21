@@ -512,7 +512,7 @@ def delete(domain_name):
 @domain_bp.route('/setting/<path:domain_name>/manage', methods=['GET', 'POST'])
 @login_required
 @operator_role_required
-def setting(domain_name, maskedip02=None, maskedip01=None):
+def setting(domain_name, defaultip01=None, maskedip02=None, maskedip01=None):
     if request.method == 'GET':
         domain = Domain.query.filter(Domain.name == domain_name).first()
         if not domain:
@@ -568,6 +568,7 @@ def setting(domain_name, maskedip02=None, maskedip01=None):
                         ttl=r['ttl'],
                         data=record['content'],
                         maskedip01=get_extra_data['maskedip01'],
+                        defaultip01=get_extra_data['defaultip01'],
                         maskedip02=get_extra_data['maskedip02'],
                         maskedswitchstatus=get_extra_data['maskedswitchstatus'],
                         comment=c,

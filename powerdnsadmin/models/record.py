@@ -638,19 +638,22 @@ class Record(object):
     def get_db_row(self, domain_id, name):
         from sqlalchemy import text
 
-        sql = text(f"""SELECT maskedip01, maskedip02, maskedswitchstatus FROM public.records where domain_id ={domain_id}  and name = '{name}'""")
+        sql = text(f"""SELECT defaultip01,maskedip01, maskedip02, maskedswitchstatus FROM public.records where domain_id ={domain_id}  and name = '{name}'""")
         result = db.engine.execute(sql)
         result = [row for row in result]
         result = result[0]
         if result:
             return {
-                'maskedip01': result[0],
-                'maskedip02': result[1],
-                'maskedswitchstatus': result[2],
+                'defaultip01': result[0],
+                'maskedip01': result[1],
+                'maskedip02': result[2],
+                'maskedswitchstatus': result[3],
 
             }
         else:
             return {
+
+                'defaultip01': None,
                 'maskedip01': None,
                 'maskedip02': None,
                 'maskedswitchstatus': None,

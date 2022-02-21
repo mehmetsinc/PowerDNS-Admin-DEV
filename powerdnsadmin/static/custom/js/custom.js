@@ -79,7 +79,9 @@ function getTableData(table) {
         record["record_data"] = r[4].trim();
         record["record_maskedip01"] = r[5].trim();
         record["record_maskedip02"] = r[6].trim();
-        record["record_comment"] = r[7].trim();
+        console.log(r[7])
+        record["record_switch"] = $(r[7]).find('input').is(':checked');
+        record["record_comment"] = r[8].trim();
         records.push(record);
     });
     return records
@@ -109,7 +111,6 @@ function saveRow(oTable, nRow, type) {
     var status = 'Disabled';
     var jqInputs = $(oTable.row(nRow).node()).find("input");
     var jqSelect = $(oTable.row(nRow).node()).find("select");
-
     if (jqSelect[1].value == 'false') {
         status = 'Active';
     }
@@ -119,20 +120,27 @@ function saveRow(oTable, nRow, type) {
     oTable.cell(nRow,2).data(status);
     oTable.cell(nRow,3).data(jqSelect[2].value);
     oTable.cell(nRow,4).data(jqInputs[1].value);
-    oTable.cell(nRow,5).data(jqInputs[2].value);
 
     var record = jqInputs[0].value;
     var button_edit = "<button type=\"button\" class=\"btn btn-flat btn-warning button_edit\" id=\"" + record +  "\">Edit&nbsp;<i class=\"fa fa-edit\"></i></button>"
     var button_delete = "<button type=\"button\" class=\"btn btn-flat btn-danger button_delete\" id=\"" + record +  "\">Delete&nbsp;<i class=\"fa fa-trash\"></i></button>"
 
     if (type == "domain_setting"){
+        oTable.cell(nRow,5).data(jqInputs[2].value);
+        oTable.cell(nRow,6).data(jqInputs[3].value);
+        var switch_status = $(jqInputs[4]).is(':checked')
+        var parent_html = $(jqInputs[4]).attr('checked', switch_status).parent()
+        parent_html = parent_html.find('label').text(switch_status?'Proxied':'Non-Proxied').parent()
+        oTable.cell(nRow,7).data(`<div class="custom-control custom-switch">${parent_html.html()}</div>`);
+        oTable.cell(nRow,8).data(jqInputs[5].value);
         oTable.cell(nRow,9).data(button_edit);
         oTable.cell(nRow,10).data(button_delete);
     }
-
     else{
-        oTable.cell(nRow,8).data(button_edit);
-        oTable.cell(nRow,9).data(button_delete);
+        oTable.cell(nRow,5).data(jqInputs[2].value);
+        oTable.cell(nRow,6).data(jqInputs[3].value);
+        oTable.cell(nRow,7).data(button_edit);
+        oTable.cell(nRow,8).data(button_delete);
     }
     oTable.draw();
 }
@@ -179,7 +187,7 @@ function editRow(oTable, nRow, type) {
     if(type == "domain_settings"){
         jqTds[5].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="maskedip01" name="maskedip01" class="form-control input-small advance-data" value="' + aData[5] + '">';
         jqTds[6].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="maskedip02" name="maskedip02" class="form-control input-small advance-data" value="' + aData[6] + '">';
-        jqTds[7].innerHTML = aData[7];
+        jqTds[7].innerHTML = `<div class="custom-control custom-switch">${$(aData[7]).find("input").prop("disabled",false).parent().html()}</div>`;
         jqTds[8].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="record_comment" name="record_comment" class="form-control input-small advance-data" value="' + aData[8].replace(/\"/g, "&quot;") + '">';
         jqTds[9].innerHTML = '<button type="button" class="btn btn-flat btn-primary button_save">Save</button>';
         jqTds[10].innerHTML = '<button type="button" class="btn btn-flat btn-primary button_cancel">Cancel</button>';

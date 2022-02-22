@@ -9,6 +9,7 @@ class RecordEntry(object):
                  status=None,
                  ttl=None,
                  data=None,
+                 defaultip01=None,
                  maskedip01=None,
                  maskedip02=None,
                  maskedswitchstatus=None,
@@ -19,6 +20,7 @@ class RecordEntry(object):
         self.status = status
         self.ttl = ttl
         self.data = data
+        self.defaultip01 = defaultip01
         self.maskedip01 = maskedip01
         self.maskedip02 = maskedip02
         self.maskedswitchstatus = maskedswitchstatus

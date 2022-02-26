@@ -302,7 +302,7 @@ def record_changelog(domain_name, record_name, record_type):
     if current_user.role.name in [ 'Administrator', 'Operator' ]:
         histories = History.query.filter(History.domain_id == domain.id).order_by(History.created_on.desc()).all()
     else:
-        # if the user isn't an administrator or operator, 
+        # if the user isn't an administrator or operator,
         # allow_user_view_history must be enabled to get here,
         # so include history for the domains for the user
         histories = db.session.query(History) \
@@ -315,7 +315,7 @@ def record_changelog(domain_name, record_name, record_type):
                 db.and_(db.or_(
                                 DomainUser.user_id == current_user.id,
                                 AccountUser.user_id == current_user.id
-                        ), 
+                        ),
                         History.domain_id == domain.id
                 )
             ).all()
@@ -338,11 +338,11 @@ def record_changelog(domain_name, record_name, record_type):
                 changes_set_of_record[change_num].remove(hre)
         if change_num in changes_set_of_record and len(changes_set_of_record[change_num]) == 0: # if empty, then remove the key
             indexes_to_pop.append(change_num)
-    
+
     for i in indexes_to_pop:
         changes_set_of_record.pop(i)
 
-    return render_template('domain_changelog.html', domain=domain, allHistoryChanges=changes_set_of_record, 
+    return render_template('domain_changelog.html', domain=domain, allHistoryChanges=changes_set_of_record,
                             record_name = record_name, record_type = record_type)
 
 
@@ -738,10 +738,35 @@ def record_apply(domain_name):
                     'msg':
                     'Domain name {0} does not exist'.format(pretty_domain_name(domain_name))
                 }), 404)
-
+        changed_data = []
+        for record in submitted_record:
+            record_maskedip01 = record.get('record_maskedip01', "")
+            record_maskedip02 = record.get('record_maskedip02', "")
+            record_switch = record.get('record_switch', False)
+            defaultip01 = record.get('record_defaultip01', "")
+            if record_switch:
+                if record_maskedip01 and record_maskedip02:
+                    record['record_type'] = "LUA"
+                    lua_query = "A \"pickclosest({'"+record_maskedip01+"','"+record_maskedip02+"'})\""
+                    record['record_data'] = lua_query
+                else:
+                    return make_response(
+                        jsonify({
+                            'status': 'error',
+                            'msg': 'maskedip01 and maskedip02 is required!'
+                        }), 400)
+            changed_data.append({
+                "domain_id": domain.id,
+                "name": record['record_name'] + "." + domain.name,
+                "maskedip01": record_maskedip01,
+                "maskedip02": record_maskedip02,
+                "maskedswitchstatus": record_switch,
+                "defaultip01": defaultip01
+            })
         r = Record()
         result = r.apply(domain_name, submitted_record)
         if result['status'] == 'ok':
+            r.update_extra_data(changed_data)
             history = History(
                 msg='Apply record changes to domain {0}'.format(pretty_domain_name(domain_name)),
                 detail=str(

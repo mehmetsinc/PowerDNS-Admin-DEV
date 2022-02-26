@@ -5,8 +5,7 @@ from flask_seasurf import SeaSurf
 from flask_mail import Mail
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_session import Session
-
-from .lib import utils
+from powerdnsadmin.lib import utils
 
 
 def create_app(config=None):

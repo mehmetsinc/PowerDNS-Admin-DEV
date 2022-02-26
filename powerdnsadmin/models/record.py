@@ -7,6 +7,7 @@ from flask import current_app
 from urllib.parse import urljoin
 from distutils.util import strtobool
 from itertools import groupby
+from sqlalchemy import text
 
 from .. import utils
 from .base import db
@@ -636,8 +637,6 @@ class Record(object):
             }
 
     def get_db_row(self, domain_id, name):
-        from sqlalchemy import text
-
         sql = text(f"""SELECT defaultip01,maskedip01, maskedip02, maskedswitchstatus FROM public.records where domain_id ={domain_id}  and name = '{name}'""")
         result = db.engine.execute(sql)
         result = [row for row in result]
@@ -648,14 +647,19 @@ class Record(object):
                 'maskedip01': result[1],
                 'maskedip02': result[2],
                 'maskedswitchstatus': result[3],
-
             }
         else:
             return {
-
                 'defaultip01': None,
                 'maskedip01': None,
                 'maskedip02': None,
                 'maskedswitchstatus': None,
-
             }
+
+    def update_extra_data(self, data):
+        for record in data:
+            sql = text("UPDATE public.records "
+                       "SET maskedip01=:maskedip01, maskedip02=:maskedip02, "
+                       "maskedswitchstatus=:maskedswitchstatus, defaultip01=:defaultip01 "
+                       "where domain_id=:domain_id  and name =:name").params(**record)
+            db.engine.execute(sql)

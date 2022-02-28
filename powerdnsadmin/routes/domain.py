@@ -115,6 +115,7 @@ def domain(domain_name):
                         status='Disabled' if record['disabled'] else 'Active',
                         ttl=r['ttl'],
                         data=record['content'],
+                        defaultip01=get_extra_data["defaultip01"],
                         maskedswitchstatus=get_extra_data['maskedswitchstatus'],
                         comment=c,
                         is_allowed_edit=True)
@@ -512,7 +513,7 @@ def delete(domain_name):
 @domain_bp.route('/setting/<path:domain_name>/manage', methods=['GET', 'POST'])
 @login_required
 @operator_role_required
-def setting(domain_name, defaultip01=None, maskedip02=None, maskedip01=None):
+def setting(domain_name):
     if request.method == 'GET':
         domain = Domain.query.filter(Domain.name == domain_name).first()
         if not domain:
@@ -743,18 +744,24 @@ def record_apply(domain_name):
             record_maskedip01 = record.get('record_maskedip01', "")
             record_maskedip02 = record.get('record_maskedip02', "")
             record_switch = record.get('record_switch', False)
-            defaultip01 = record.get('record_defaultip01', "")
-            if record_switch:
-                if record_maskedip01 and record_maskedip02:
-                    record['record_type'] = "LUA"
-                    lua_query = "A \"pickclosest({'"+record_maskedip01+"','"+record_maskedip02+"'})\""
-                    record['record_data'] = lua_query
+            defaultip01 = record.get('record_default01', "")
+
+            if record['record_type'] == 'A':
+                if record_switch:
+                    if record_maskedip01 and record_maskedip02:
+                        record['record_type'] = "LUA"
+                        lua_query = "A \"pickclosest({'"+record_maskedip01+"','"+record_maskedip02+"'})\""
+                        record['record_data'] = lua_query
+                    else:
+                        return make_response(
+                            jsonify({
+                                'status': 'error',
+                                'msg': 'maskedip01 and maskedip02 is required!'
+                            }), 400)
                 else:
-                    return make_response(
-                        jsonify({
-                            'status': 'error',
-                            'msg': 'maskedip01 and maskedip02 is required!'
-                        }), 400)
+                    if defaultip01:
+                        record['record_data'] = defaultip01
+
             changed_data.append({
                 "domain_id": domain.id,
                 "name": record['record_name'] + "." + domain.name,

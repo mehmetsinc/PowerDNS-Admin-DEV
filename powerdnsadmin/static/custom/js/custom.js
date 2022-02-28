@@ -66,7 +66,7 @@ function applyRecordChanges(data, domain) {
     });
 }
 
-function getTableData(table) {
+function getTableData(table, type) {
     // reformat - pretty format
     var records = []
     table.rows().every(function() {
@@ -77,11 +77,17 @@ function getTableData(table) {
         record["record_status"] = r[2].trim();
         record["record_ttl"] = r[3].trim();
         record["record_data"] = r[4].trim();
-        record["record_default01"] = r[5].trim();
-        record["record_maskedip01"] = r[6].trim();
-        record["record_maskedip02"] = r[7].trim();
-        record["record_switch"] = $(r[8]).find('input').is(':checked');
-        record["record_comment"] = r[9].trim();
+        if(type == 'domain_settings'){
+            record["record_default01"] = r[5].trim();
+            record["record_maskedip01"] = r[6].trim();
+            record["record_maskedip02"] = r[7].trim();
+            record["record_switch"] = $(r[8]).find('input').is(':checked');
+            record["record_comment"] = r[9].trim();
+        }
+        else{
+            record["record_switch"] = $(r[5]).find('input').is(':checked');
+            record["record_comment"] = r[6].trim();
+        }
         records.push(record);
     });
     return records
@@ -118,7 +124,10 @@ function saveRow(oTable, nRow, type) {
         oTable.cell(nRow,11).data(button_delete);
     }
     else{
-        oTable.cell(nRow,5).data(jqInputs[2].value);
+        var switch_status = $(jqInputs[2]).is(':checked')
+        var parent_html = $(jqInputs[2]).attr('checked', switch_status).attr('disabled', true).parent()
+        parent_html = parent_html.find('label').text(switch_status?'Proxied':'Non-Proxied').parent()
+        oTable.cell(nRow,5).data(`<div class="custom-control custom-switch">${parent_html.html()}</div>`);
         oTable.cell(nRow,6).data(jqInputs[3].value);
         oTable.cell(nRow,7).data(button_edit);
         oTable.cell(nRow,8).data(button_delete);

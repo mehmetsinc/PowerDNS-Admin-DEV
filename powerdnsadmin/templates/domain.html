@@ -54,7 +54,7 @@
                                 <th>Status</th>
                                 <th>TTL</th>
                                 <th>Data</th>
-                                <th>Switch status</th>
+                                <th>Proxed</th>
                                 <th>Comment</th>
                                 <th>Masking</th>
                                 <th>Edit</th>
@@ -71,7 +71,11 @@
                                         {{ (record.name,domain.name) | display_record_name | pretty_domain_name }}
                                     </td>
                                     <td>
-                                        {{ record.type }}
+                                        {% if record.maskedswitchstatus %}
+                                            A
+                                        {% else %}
+                                            {{ record.type }}
+                                        {% endif %}
                                     </td>
                                     <td>
                                         {{ record.status }}
@@ -80,7 +84,11 @@
                                         {{ record.ttl }}
                                     </td>
                                     <td>
-                                        {{ record.data | pretty_domain_name }}
+                                        {% if record.maskedswitchstatus %}
+                                            {{ record.defaultip01 }}
+                                        {% else %}
+                                            {{ record.data | pretty_domain_name }}
+                                        {% endif %}
                                     </td>
 
                                     <td>
@@ -91,15 +99,6 @@
                                     </td>
                                     <td>
                                         {{ record.comment }}
-                                    </td>
-                                    <td>
-
-                                        <select class="js-example-basic-multiple" name="states[]" multiple="multiple">
-                                          <option value="1">192.168.1.34</option>
-                                          <option value="2">192.168.1.35</option>
-                                          <option value="3">192.168.1.36</option>
-                                          <option value="4">192.168.1.343</option>
-                                        </select>
                                     </td>
                                 {% if domain.type != 'Slave' %}
                                     <td width="6%">
@@ -302,12 +301,17 @@
             // clear search first
             $("#tbl_records").DataTable().search('').columns().search('').draw();
 
+            const switch_html = `<div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input records_switch" disabled>
+                        <label class="custom-control-label">Non-Proxied</label>
+                     </div>`
+
             // add new row
             var default_type = records_allow_edit[0]
             {% if current_user.role.name in ['Administrator', 'Operator'] or SETTING.get('allow_user_view_history') %}
-	        var nRow = jQuery('#tbl_records').dataTable().fnAddData(['', default_type, 'Active', window.ttl_options[0][0], '', '', '', '', '', '0']);
+	        var nRow = jQuery('#tbl_records').dataTable().fnAddData(['', default_type, 'Active', window.ttl_options[0][0], '', switch_html, '', '', '', '', '0']);
             {% else %}
-            var nRow = jQuery('#tbl_records').dataTable().fnAddData(['', default_type, 'Active', window.ttl_options[0][0], '', '', '', '', '0']);
+            var nRow = jQuery('#tbl_records').dataTable().fnAddData(['', default_type, 'Active', window.ttl_options[0][0], '', switch_html, '', '', '', '0']);
             {% endif %}
             editRow($("#tbl_records").DataTable(), nRow);
             document.getElementById("edit-row-focus").focus();

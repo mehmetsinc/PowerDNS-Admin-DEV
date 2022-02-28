@@ -28,3 +28,4 @@ Flask-SSLify==0.1.5
 Flask-Mail==0.9.1
 flask-session==0.3.2
 psycopg2-binary==2.9.3
+itsdangerous==2.0.1

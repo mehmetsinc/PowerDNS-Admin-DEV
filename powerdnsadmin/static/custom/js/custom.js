@@ -77,37 +77,17 @@ function getTableData(table) {
         record["record_status"] = r[2].trim();
         record["record_ttl"] = r[3].trim();
         record["record_data"] = r[4].trim();
-        record["record_maskedip01"] = r[5].trim();
-        record["record_maskedip02"] = r[6].trim();
-        console.log(r[7])
-        record["record_switch"] = $(r[7]).find('input').is(':checked');
-        record["record_comment"] = r[8].trim();
+        record["record_default01"] = r[5].trim();
+        record["record_maskedip01"] = r[6].trim();
+        record["record_maskedip02"] = r[7].trim();
+        record["record_switch"] = $(r[8]).find('input').is(':checked');
+        record["record_comment"] = r[9].trim();
         records.push(record);
     });
     return records
 }
 
-function getMaskedTableData(table) {
-    // reformat - pretty format
-    var maskedrecords = []
-    table.rows().every(function() {
-        var r = this.data();
-        var record = {}
-        record["record_name"] = r[0].trim();
-        record["record_type"] = r[1].trim();
-        record["record_status"] = r[2].trim();
-        record["record_ttl"] = r[3].trim();
-        record["record_data"] = r[4].trim();
-        record["record_maskedip01"] = r[5].trim();
-        record["record_maskedip02"] = r[6].trim();
-        record["record_comment"] = r[7].trim();
-        maskedrecords.push(maskedrecord);
-    });
-    return maskedrecords
-}
-
 function saveRow(oTable, nRow, type) {
-
     var status = 'Disabled';
     var jqInputs = $(oTable.row(nRow).node()).find("input");
     var jqSelect = $(oTable.row(nRow).node()).find("select");
@@ -128,13 +108,14 @@ function saveRow(oTable, nRow, type) {
     if (type == "domain_setting"){
         oTable.cell(nRow,5).data(jqInputs[2].value);
         oTable.cell(nRow,6).data(jqInputs[3].value);
-        var switch_status = $(jqInputs[4]).is(':checked')
-        var parent_html = $(jqInputs[4]).attr('checked', switch_status).parent()
+        oTable.cell(nRow,7).data(jqInputs[4].value);
+        var switch_status = $(jqInputs[5]).is(':checked')
+        var parent_html = $(jqInputs[5]).attr('checked', switch_status).attr('disabled', true).parent()
         parent_html = parent_html.find('label').text(switch_status?'Proxied':'Non-Proxied').parent()
-        oTable.cell(nRow,7).data(`<div class="custom-control custom-switch">${parent_html.html()}</div>`);
-        oTable.cell(nRow,8).data(jqInputs[5].value);
-        oTable.cell(nRow,9).data(button_edit);
-        oTable.cell(nRow,10).data(button_delete);
+        oTable.cell(nRow,8).data(`<div class="custom-control custom-switch">${parent_html.html()}</div>`);
+        oTable.cell(nRow,9).data(jqInputs[5].value);
+        oTable.cell(nRow,10).data(button_edit);
+        oTable.cell(nRow,11).data(button_delete);
     }
     else{
         oTable.cell(nRow,5).data(jqInputs[2].value);
@@ -185,12 +166,13 @@ function editRow(oTable, nRow, type) {
     jqTds[3].innerHTML = '<select class="form-control" id="record_ttl" name="record_ttl" value="' + aData[3]  + '">' + ttl_opts + '</select>';
     jqTds[4].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="current_edit_record_data" name="current_edit_record_data" class="form-control input-small advance-data" value="' + aData[4].replace(/\"/g,"&quot;") + '">';
     if(type == "domain_settings"){
-        jqTds[5].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="maskedip01" name="maskedip01" class="form-control input-small advance-data" value="' + aData[5] + '">';
-        jqTds[6].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="maskedip02" name="maskedip02" class="form-control input-small advance-data" value="' + aData[6] + '">';
-        jqTds[7].innerHTML = `<div class="custom-control custom-switch">${$(aData[7]).find("input").prop("disabled",false).parent().html()}</div>`;
-        jqTds[8].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="record_comment" name="record_comment" class="form-control input-small advance-data" value="' + aData[8].replace(/\"/g, "&quot;") + '">';
-        jqTds[9].innerHTML = '<button type="button" class="btn btn-flat btn-primary button_save">Save</button>';
-        jqTds[10].innerHTML = '<button type="button" class="btn btn-flat btn-primary button_cancel">Cancel</button>';
+        jqTds[5].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" name="maskedip01" class="form-control input-small advance-data" value="' + aData[5] + '">';
+        jqTds[6].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" name="maskedip01" class="form-control input-small advance-data" value="' + aData[6] + '">';
+        jqTds[7].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" name="maskedip02" class="form-control input-small advance-data" value="' + aData[7] + '">';
+        jqTds[8].innerHTML = `<div class="custom-control custom-switch">${$(aData[8]).find("input").prop("disabled",false).parent().html()}</div>`;
+        jqTds[9].innerHTML = '<input type="text" style="display:table-cell; width:100% !important" id="record_comment" name="record_comment" class="form-control input-small advance-data" value="' + aData[9].replace(/\"/g, "&quot;") + '">';
+        jqTds[10].innerHTML = '<button type="button" class="btn btn-flat btn-primary button_save">Save</button>';
+        jqTds[11].innerHTML = '<button type="button" class="btn btn-flat btn-primary button_cancel">Cancel</button>';
     }
     else{
         jqTds[5].innerHTML = aData[5];

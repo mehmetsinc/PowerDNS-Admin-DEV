@@ -110,9 +110,10 @@
                                 <th>Status</th>
                                 <th>TTL</th>
                                 <th>Data</th>
+                                <th>Default</th>
                                 <th>Maskedip01</th>
                                 <th>Maskedip02</th>
-                                <th>Switch status</th>
+                                <th>Proxed</th>
                                 <th>Comment</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
@@ -138,6 +139,9 @@
                                     </td>
                                     <td>
                                         {{ record.data | pretty_domain_name }}
+                                    </td>
+                                    <td>
+                                        {{ record.defaultip01 }}
                                     </td>
                                     <td>
                                         {{ record.maskedip01 }}
@@ -527,12 +531,12 @@
         modal.find('.modal-body p').text(info);
         modal.modal('show');
 
-        $("#button_delete_confirm").unbind().one('click', function(e) {
+        $("#delete_row").unbind().one('click', function(e) {
             table.row(nRow).remove().draw();
             modal.modal('hide');
         });
 
-        $("#button_delete_cancel").unbind().one('click', function(e) {
+        $("#delete_row").unbind().one('click', function(e) {
             modal.modal('hide');
         });
     });
@@ -916,7 +920,7 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-flat btn-default pull-left" id="button_delete_cancel"
                     data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-flat btn-danger" id="button_delete_confirm">Delete</button>
+                <button type="button" class="btn btn-flat btn-danger" id="delete_row">Delete</button>
             </div>
         </div>
         <!-- /.modal-content -->
